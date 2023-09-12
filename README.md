@@ -2,6 +2,15 @@
 
 Tic-Tac-Toe written in C++. Uses Raylib for rendering.
 
+# Running locally
+
+Compiled WASM file is included in `app/`.
+Run a local server,
+```
+cd app
+python -m http.server --bind 127.0.0.1
+```
+
 # Building
 Run the build script,
 ```
@@ -30,11 +39,7 @@ emcmake cmake ../..
 cmake --build .
 ```
 
-To run a local server for testing, copy `ttt.js` and `ttt.wasm` from `build` to `app`, which is done by `build.sh`,
-```
-cd app
-emrun .
-```
+To run a local server for testing, copy `ttt.js` and `ttt.wasm` from `build/` to `app/`, which is done by `build.sh`,
 
 ## Requirements to build for web
 - Emscripten
