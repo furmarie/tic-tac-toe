@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 enum class Turn {
     Cross,
@@ -15,19 +16,29 @@ enum class Winner {
 
 class Game {
 public:
-    Game(int size);
+
+    Game(int size, int width, int height);
     ~Game();
     void Draw(float);
     void Clicked(Vector2);
+    void Reset();
+    void* PreReload();
+    void PostReload(void*);
 
 private:
-    Turn m_turn;
-    int m_size;
-    Turn* m_state = nullptr;
-    bool m_gameOver = false;
-    Winner m_winner;
-    Color m_clearColor = {120, 120, 120};
-
+    typedef struct {
+        int m_size;
+        bool m_gameOver = false;
+        Turn m_turn;
+        Turn* m_state = nullptr;
+        Winner m_winner;
+        Shader confetti;
+        int confetti_res_loc;
+        int confetti_time_loc;
+    } state;
+    float runTime;
+    state m_state;
+    Color m_clearColor;
     void m_CheckWinner();
     void m_NextTurn();
     void m_EndGame(Winner);

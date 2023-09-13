@@ -9,17 +9,21 @@
 #include "ttt.h"
 
 int main(void) {
-    InitWindow(500, 500, "TTT");
+    const int windowWidth = 500, windowHeight = 500;
+    InitWindow(windowWidth, windowHeight, "TTT");
     SetTargetFPS(30);
 
-    Game game(3);
+    Game game(3, windowWidth, windowHeight);
 
     while(!WindowShouldClose()) {
         BeginDrawing();
+        if(IsKeyDown(KEY_R)) {
+            game.Reset();
+        }
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             game.Clicked(GetMousePosition());
         }
-        game.Draw(GetTime());
+        game.Draw(GetFrameTime());
         EndDrawing();
     }
 
