@@ -6,20 +6,35 @@
 #include <emscripten.h>
 #endif
 
-#include "ttt.h"
+#include "ttt_base.h"
+
+
+#include "hot_reload.h"
 
 int main(void) {
     InitWindow(500, 500, "TTT");
     SetTargetFPS(30);
 
-    Game game(3);
+    GameBase* game;
+    reload_libplug(game);
+    printf("HEREREREE\n");
+    game->Init(3, 500, 500);
+
 
     while(!WindowShouldClose()) {
         BeginDrawing();
-        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            game.Clicked(GetMousePosition());
+        if(IsKeyDown(KEY_R)) {
+            void* state = game->PreReload();
+            delete game;
+            if(!reload_libplug(game)) {
+                return 1;
+            }
+            game->PostReload(state);
         }
-        game.Draw(GetTime());
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            game->Clicked(GetMousePosition());
+        }
+        game->Draw(GetFrameTime());
         EndDrawing();
     }
 

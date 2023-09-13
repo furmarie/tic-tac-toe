@@ -1,34 +1,45 @@
 #include <raylib.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-enum class Turn {
-    Cross,
-    Circle,
-    None = -1
-};
+#include "ttt_base.h"
 
-enum class Winner {
-    Cross,
-    Circle, 
-    Drawn
-};
-
-class Game {
+class Game: public GameBase {
 public:
-    Game(int size);
+    Game() {
+        printf("MADE GAME 6 !!! ");
+    }
     ~Game();
-    void Draw(float);
-    void Clicked(Vector2);
+    void Init(int size, int width, int height) override;
+    void Draw(float) override;
+    void Clicked(Vector2) override;
+    void Reset() override;
+    void* PreReload() override;
+    void PostReload(void*) override;
 
 private:
-    Turn m_turn;
-    int m_size;
-    Turn* m_state = nullptr;
-    bool m_gameOver = false;
-    Winner m_winner;
-    Color m_clearColor = {120, 120, 120};
-
+    typedef struct {
+        int m_size;
+        bool m_gameOver = false;
+        Turn m_turn;
+        Turn* m_state = nullptr;
+        Winner m_winner;
+        Shader confetti;
+        int confetti_res_loc;
+        int confetti_time_loc;
+        RenderTexture2D screen;
+    } state;
+    float runTime;
+    state m_state;
+    Color m_clearColor;
     void m_CheckWinner();
     void m_NextTurn();
     void m_EndGame(Winner);
 };
+
+extern "C" {
+GameBase* factory(void) {
+    printf("Fact 3 \n");
+    return static_cast<GameBase*>(new Game);
+}
+}

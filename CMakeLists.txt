@@ -27,12 +27,27 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
 endif()
 
 
-file(GLOB sources src/*.cc)
+if(NOT EMSCRIPTEN)
+  file(GLOB sources src/main.cc)
+  file(GLOB lib_sources src/ttt.cc)
 
-add_executable(ttt ${sources})
-target_link_libraries(ttt raylib)
+  add_executable(ttt ${sources})
+  add_library(plug SHARED ${lib_sources})
+  target_link_libraries(ttt plug raylib)
 
-if(EMSCRIPTEN) 
+  if(HOT_RELOAD)
+    message("HOT_RELOAD YES")
+    target_compile_options(plug PUBLIC -fPIC -rdynamic -shared)
+    target_compile_options(ttt PUBLIC -rdynamic -ldl)
+    target_compile_definitions(ttt PUBLIC -DHOT_RELOAD)
+  endif()
+
+else() 
+  file(GLOB sources src/*.cc)
+
+  add_executable(ttt ${sources})
+  target_link_libraries(ttt raylib)
+
   target_compile_definitions(ttt PUBLIC -DPLATFORM=Web)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s USE_GLFW=3 -s USE_WEBGL2=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy")
