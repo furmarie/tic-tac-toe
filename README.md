@@ -1,6 +1,6 @@
 # Tic-Tac-Toe using Raylib
 
-Tic-Tac-Toe written in C++. Uses Raylib for rendering.
+Tic-Tac-Toe written in C. Uses Raylib for rendering.
 
 # Running locally
 
