@@ -1,3 +1,6 @@
 .vscode
 **/build
 tmp
+app/resources
+build/resources
+raylib/

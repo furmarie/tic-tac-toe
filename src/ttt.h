@@ -1,13 +1,17 @@
+#pragma once
+
 #include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-enum class Turn {
-    Cross,
-    Circle,
-    None = -1
-};
+#define LIST_OF_FUNCS                   \
+    FUNC(ttt_init, void, int, int, int) \
+    FUNC(ttt_pre_reload, void*, void)  \
+    FUNC(ttt_post_reload, void, void*) \
+    FUNC(ttt_draw, void, float) \
+    FUNC(ttt_reset, void, void)
 
+<<<<<<< HEAD
 enum class Winner {
     Cross,
     Circle, 
@@ -43,3 +47,8 @@ private:
     void m_NextTurn();
     void m_EndGame(Winner);
 };
+=======
+#define FUNC(func, ret, ...) typedef ret func##_t(__VA_ARGS__);
+LIST_OF_FUNCS
+#undef FUNC
+>>>>>>> hot-reload-attempt

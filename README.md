@@ -12,37 +12,22 @@ python -m http.server --bind 127.0.0.1
 ```
 
 # Building
-Run the build script,
+Run the build script without arguments for usage,
 ```
 chmod +x build.sh
 ./build.sh
 ```
-To also build for web,
+Hot reload is now supported. To build with hot reload enabled,
 ```
-./build.sh -w
+./build.sh -dr
 ```
-Or,
-```
-mkdir -p build/desktop
-cd build/desktop
-cmake ../..
-cmake --build .
-```
+Make code changes, then build again with  `./build.sh -dr`, then press `ctrl+R` to reload.
 
 The compiled binary is in `build/ttt`.
 
-For web,
-```
-mkdir -p build/web
-cd build/web
-emcmake cmake ../..
-cmake --build .
-```
-
-To run a local server for testing, copy `ttt.js` and `ttt.wasm` from `build/` to `app/`, which is done by `build.sh`,
 
 ## Requirements to build for web
-- Emscripten
+- [Emscripten](https://emscripten.org/)
 
 
 # TODOs
