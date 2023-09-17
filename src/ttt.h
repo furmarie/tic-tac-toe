@@ -1,45 +1,15 @@
+#pragma once
+
 #include <raylib.h>
 #include <stdlib.h>
-#include <stdio.h>
 
-#include "ttt_base.h"
+#define LIST_OF_FUNCS                   \
+    FUNC(ttt_init, void, int, int, int) \
+    FUNC(ttt_pre_reload, void*, void)  \
+    FUNC(ttt_post_reload, void, void*) \
+    FUNC(ttt_draw, void, float) \
+    FUNC(ttt_reset, void, void)
 
-class Game: public GameBase {
-public:
-    Game() {
-        printf("MADE GAME 6 !!! ");
-    }
-    ~Game();
-    void Init(int size, int width, int height) override;
-    void Draw(float) override;
-    void Clicked(Vector2) override;
-    void Reset() override;
-    void* PreReload() override;
-    void PostReload(void*) override;
-
-private:
-    typedef struct {
-        int m_size;
-        bool m_gameOver = false;
-        Turn m_turn;
-        Turn* m_state = nullptr;
-        Winner m_winner;
-        Shader confetti;
-        int confetti_res_loc;
-        int confetti_time_loc;
-        RenderTexture2D screen;
-    } state;
-    float runTime;
-    state m_state;
-    Color m_clearColor;
-    void m_CheckWinner();
-    void m_NextTurn();
-    void m_EndGame(Winner);
-};
-
-extern "C" {
-GameBase* factory(void) {
-    printf("Fact 3 \n");
-    return static_cast<GameBase*>(new Game);
-}
-}
+#define FUNC(func, ret, ...) typedef ret func##_t(__VA_ARGS__);
+LIST_OF_FUNCS
+#undef FUNC
