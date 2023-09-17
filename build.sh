@@ -78,3 +78,5 @@ done
 
 [ "$flag_desktop" -eq 1 ] && build_desktop
 [ "$flag_web" -eq 1 ] && build_web
+
+exit 0

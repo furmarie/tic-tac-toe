@@ -52,11 +52,6 @@ void ttt_init(int size, int width, int height) {
     m_state->confetti_res_loc = GetShaderLocation(m_state->confetti, "resolution");
 }
 
-// Game::~Game() {
-//     UnloadShader(m_state->confetti);
-//     free(m_state->m_state);
-// }
-
 void ttt_reset() {
     m_state->runTime = 0;
     for (int i = 0; i < m_state->m_size * m_state->m_size; i++) {
