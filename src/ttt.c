@@ -1,5 +1,5 @@
-#include <string.h>
 #include <assert.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "ttt.h"
@@ -8,25 +8,25 @@
 
 #define GLSL_VERSION 330
 
-enum Turn {
+typedef enum Turn {
     Turn_Cross,
     Turn_Circle,
     Turn_None = -1
-};
+} Turn;
 
-enum Winner {
+typedef enum Winner {
     Winner_Cross,
     Winner_Circle,
     Winner_Drawn
-};
+} Winner;
 
 typedef struct {
     int m_size;
     float runTime;
     bool m_gameOver;
-    enum Turn m_turn;
-    enum Turn* m_state;
-    enum Winner m_winner;
+    Turn m_turn;
+    Turn* m_state;
+    Winner m_winner;
     Shader confetti;
     int confetti_res_loc;
     int confetti_time_loc;
@@ -35,13 +35,12 @@ typedef struct {
 ttt_state* m_state = NULL;
 
 void ttt_init(int size, int width, int height) {
-    printf("Game::Init\n");
     m_state = (ttt_state*)malloc(sizeof(*m_state));
     memset(m_state, 0, sizeof(*m_state));
     m_state->m_size = size;
     m_state->m_turn = Turn_Cross;
 
-    m_state->m_state = (enum Turn*)malloc(size * size * sizeof(enum Turn));
+    m_state->m_state = (Turn*)malloc(size * size * sizeof(Turn));
     for (int i = 0; i < size * size; i++) {
         m_state->m_state[i] = Turn_None;
     }
@@ -62,7 +61,7 @@ void ttt_reset() {
 }
 
 bool walk(int x, int y, int dx, int dy) {
-    enum Turn* state = m_state->m_state;
+    Turn* state = m_state->m_state;
     int size = m_state->m_size;
     int cnt = 1;
     while (true) {
@@ -84,7 +83,7 @@ bool walk(int x, int y, int dx, int dy) {
     return cnt == size;
 };
 
-void ttt_end_game(enum Winner winner) {
+void ttt_end_game(Winner winner) {
     if (m_state->m_gameOver) {
         return;
     }
@@ -223,8 +222,10 @@ void* ttt_pre_reload() {
     ttt_state* ptr = (ttt_state*)malloc(sizeof(*m_state));
     memcpy(ptr, m_state, sizeof(*m_state));
     int sz = m_state->m_size;
-    ptr->m_state = (enum Turn*)malloc(sizeof(enum Turn*) * sz * sz);
-    memcpy(ptr->m_state, m_state->m_state, sizeof(enum Turn*) * sz * sz);
+    ptr->m_state = (Turn*)malloc(sizeof(Turn*) * sz * sz);
+    memcpy(ptr->m_state, m_state->m_state, sizeof(Turn*) * sz * sz);
+    free(m_state->m_state);
+    free(m_state);
     return ptr;
 }
 

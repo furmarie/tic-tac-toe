@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <raylib.h>
 
 #ifdef __EMSCRIPTEN__
