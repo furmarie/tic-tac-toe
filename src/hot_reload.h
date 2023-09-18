@@ -15,4 +15,4 @@
     #undef FUNC
     #define reload_libplug() true
     ttt_reset_t ttt_reset;
-#endif // HOT_RELOAD
+#endif  // HOT_RELOAD
