@@ -14,7 +14,6 @@ python -m http.server --bind 127.0.0.1
 # Building
 Run the build script without arguments for usage,
 ```
-chmod +x build.sh
 ./build.sh
 ```
 Hot reload is now supported. To build with hot reload enabled,
