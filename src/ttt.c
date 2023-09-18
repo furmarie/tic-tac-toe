@@ -24,9 +24,12 @@ typedef struct {
     int m_size;
     float runTime;
     bool m_gameOver;
-    Turn m_turn;
-    Turn* m_state;
+    enum Turn m_turn;
+    enum Turn* m_state;
     Winner m_winner;
+
+    int win_start, win_end;
+
     Shader confetti;
     int confetti_res_loc;
     int confetti_time_loc;
@@ -111,17 +114,21 @@ void ttt_check_winner() {
         for (int i = 0; i < m_state->m_size; i++) {
             bool gameWon = walk(i, 0, dx[k], dy[k]);
             if (gameWon == true) {
-                if (m_state->m_state[i * m_state->m_size + 0] == Turn_Circle) {
+                int ind = i * m_state->m_size + 0;
+                m_state->win_start = ind;
+                m_state->win_end = m_state->m_size * (i + dx[k] * 2) + dy[k] * 2;
+                if (m_state->m_state[ind] == Turn_Circle) {
                     ttt_end_game(Winner_Circle);
                 } else {
                     ttt_end_game(Winner_Cross);
                 }
             }
-        }
-        for (int j = 0; j < m_state->m_size; j++) {
-            bool gameWon = walk(0, j, dx[k], dy[k]);
+            gameWon = walk(0, i, dx[k], dy[k]);
             if (gameWon == true) {
-                if (m_state->m_state[0 + j] == Turn_Circle) {
+                int ind = 0 + i;
+                m_state->win_start = ind;
+                m_state->win_end = m_state->m_size * dx[k] * 2 + i + dy[k] * 2;
+                if (m_state->m_state[ind] == Turn_Circle) {
                     ttt_end_game(Winner_Circle);
                 } else {
                     ttt_end_game(Winner_Cross);
@@ -162,17 +169,26 @@ void ttt_clicked(Vector2 pos) {
     ttt_check_winner();
 }
 
+#define ind_to_coord(ind, x, y)        \
+    int x = (ind) / (m_state->m_size); \
+    int y = (ind) % (m_state->m_size);
+
+// Returns the center of cell with top left coords (x, y) and cell size cellSize
+Vector2 cell_center(int x, int y, int cellSize) {
+    return CLITERAL(Vector2){x + cellSize / 2, y + cellSize / 2};
+}
+
 void ttt_draw(float dt) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         ttt_clicked(GetMousePosition());
     }
-    
+
     float cellSize = (float)GetScreenWidth() / m_state->m_size;
     Color lineCol = PINK;
 
     Color clear_color = {120, 130, 130, 255};
 
-    if(m_state->m_gameOver && m_state->m_winner != Winner_Drawn) {
+    if (m_state->m_gameOver && m_state->m_winner != Winner_Drawn) {
         m_state->runTime += dt * 0.5;
         SetShaderValue(m_state->confetti, m_state->confetti_time_loc, &m_state->runTime, SHADER_UNIFORM_FLOAT);
 
@@ -181,11 +197,10 @@ void ttt_draw(float dt) {
 
         // Texture2D texture = { rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
         BeginShaderMode(m_state->confetti);
-            // DrawTexture(texture, 5, 5, RED);
-            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), CLITERAL(Color){ 0, 0, 0, 0});
+        // DrawTexture(texture, 5, 5, RED);
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), CLITERAL(Color){0, 0, 0, 0});
         EndShaderMode();
-    }
-    else {
+    } else {
         ClearBackground(clear_color);
     }
 
@@ -197,7 +212,7 @@ void ttt_draw(float dt) {
             DrawRectangleLinesEx(rec, 5, lineCol);
 
             int ind = i * m_state->m_size + j;
-            if (m_state->m_state[ind] ==  Turn_Circle) {
+            if (m_state->m_state[ind] == Turn_Circle) {
                 Vector2 center = {cell_x + cellSize / 2, cell_y + cellSize / 2};
                 float outerRadius = cellSize * 0.8 * 0.5;
                 float innerRadius = cellSize * 0.7 * 0.5;
@@ -214,6 +229,15 @@ void ttt_draw(float dt) {
                 DrawLineEx(pos3, pos4, 5, lineCol);
             }
         }
+    }
+
+    if (m_state->m_gameOver && m_state->m_winner != Winner_Drawn) {
+        int start_i = m_state->win_start, end_i = m_state->win_end;
+        ind_to_coord(start_i, start_x, start_y);
+        ind_to_coord(end_i, end_x, end_y);
+        Vector2 start_pos = cell_center(start_x * cellSize, start_y * cellSize, cellSize);
+        Vector2 end_pos = cell_center(end_x * cellSize, end_y * cellSize, cellSize);
+        DrawLineEx(start_pos, end_pos, 10, WHITE);
     }
 }
 
