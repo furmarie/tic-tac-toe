@@ -9,11 +9,11 @@ if [[ $# -eq 0 ]]; then
     exit 0
 fi
 
-set -xe
-
 raylib_ver="4.5.0"
 raylib_url="https://github.com/raysan5/raylib/archive/refs/tags/$raylib_ver.tar.gz"
 raylib_dir="./raylib/raylib-$raylib_ver"
+
+set -xe
 
 if [[ ! -d "./raylib/raylib-${raylib_ver}" ]]; then
     mkdir -p ./raylib 
@@ -28,21 +28,27 @@ build_desktop() {
     # Building raylib
     mkdir -p ./build
 
-    CFLAGS="-Wall -Wextra -ggdb"
-    LIBS="-lraylib `pkg-config --libs glfw3` -lm -ldl -lpthread"
+    CFLAGS="-ggdb"
+    LIBS="-lraylib -lm -ldl -lpthread"
+    INCLUDES="-I$raylib_dir/src/ -I$raylib_dir/src/external/"
     if [[ $hot_reload -eq 1 ]]; then
         if [[ ! -f ./build/libraylib.so ]]; then
             make -C $raylib_dir/src/ clean
-            make -C "$raylib_dir/src/" PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED
+            make -j4 -C "$raylib_dir/src/" PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED
             cp $raylib_dir/src/libraylib.so* ./build/
         fi
         gcc $CFLAGS -o ./build/libplug.so -fPIC -shared \
-            ./src/ttt.c -L./lib/ $LIBS 
-        gcc $CFLAGS -DHOT_RELOAD -o ./build/ttt ./src/main.c ./src/hot_reload.c -L./lib/ \
-            $LIBS -L./build/ -Wl,-rpath=./build/ -Wl,-rpath=./
+            $INCLUDES ./src/ttt.c -L./build/ $LIBS -Wl,-rpath=./build/ -Wl,-rpath=./
+        gcc $CFLAGS -DHOT_RELOAD -o ./build/ttt ./src/main.c ./src/hot_reload.c \
+            $INCLUDES -L./build/ $LIBS -Wl,-rpath=./build/ -Wl,-rpath=./
     else
-        gcc $CFLAGS  -o ./build/ttt ./src/main.c ./src/ttt.c $LIBS \
-            -L./build/ -Wl,-rpath=./build/ -Wl,-rpath=./
+        if [[ ! -f ./build/libraylib.a ]]; then
+            make -C $raylib_dir/src/ clean
+            make -j4 -C "$raylib_dir/src/" PLATFORM=PLATFORM_DESKTOP
+            cp $raylib_dir/src/libraylib.a ./build/
+        fi
+        gcc $CFLAGS -o ./build/ttt ./src/main.c ./src/ttt.c $LIBS \
+            $INCLUDES -L./build/
     fi
 
     cp -r ./resources ./build/
@@ -51,13 +57,13 @@ build_desktop() {
 build_web() {
     if [[ ! -f ./build/web/libraylib.a ]]; then
         make -C $raylib_dir/src/ clean
-        make -C "$raylib_dir/src/" PLATFORM=PLATFORM_WEB
+        make -j 4 -C "$raylib_dir/src/" PLATFORM=PLATFORM_WEB
         mkdir -p ./build/web
         cp $raylib_dir/src/libraylib.a ./build/web/
     fi
-    emcc $CFLAGS -o ./app/ttt.js ./src/ttt.c ./src/main.c \
-         -I$raylib_dir/src/ -I$raylib_dir/src/external/ -L$raylib_dir/src/ \
-         -L./build/web/ ./build/web/libraylib.a \
+    emcc -o ./app/ttt.js ./src/ttt.c ./src/main.c \
+         -I$raylib_dir/src/ -I$raylib_dir/src/external/ \
+         -L./build/web/ -lraylib \
          -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s USE_GLFW=3 \
          -s USE_WEBGL2=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy -O3 \
          $LIBS 
